@@ -1,0 +1,53 @@
+<!-- reviews.html -->
+<style>
+    /* Style for the reviews table */
+    .reviews-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #ddd;
+    }
+
+    .reviews-table th, .reviews-table td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .reviews-table th {
+        background-color: #f2f2f2;
+    }
+
+    .reviews-table tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    .reviews-table tbody tr:hover {
+        background-color: #ddd;
+    }
+</style>
+
+<!-- reviews.html -->
+<h1>Reviews for {{ book.title }}</h1>
+
+{% if reviews %}
+    <table class="table reviews-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Rating</th>
+                <th>Comment</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for review in reviews %}
+                <tr>
+                    <td>{{ review.user.username }}</td>
+                    <td>{{ review.rating }}</td>
+                    <td>{{ review.comment }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No reviews yet.</p>
+{% endif %}

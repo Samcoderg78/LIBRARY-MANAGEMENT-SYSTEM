@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Sam Library</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <link rel="icon" href="{{ url_for('static', filename='favicon.jpeg') }}" type="image/x-icon">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand">Sam Library</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about">About</a>
+                </li>
+            </ul>
+
+            <!-- Inside the navbar -->
+            <form class="form-inline my-2 my-lg-0" action="{{ url_for('search_books') }}" method="GET">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search by title, author, or section" aria-label="Search" name="query">
+                <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Search</button>
+            </form>
+
+            <div class="mx-2">
+                <a href="/stats_user" id="statsLink" style="margin-bottom: 5px;" class="btn btn-primary">Stats</a>
+            </div>
+            <!-- My Books Button -->
+            <div class="mx-2">
+                <button type="button" style="margin-bottom: 5px;" class="btn btn-success" data-toggle="modal" data-target="#myBooksModal">My books</button>
+            </div>
+
+            <!-- Logout Button -->
+            <div class="mx-2">
+                <button id="logoutButton" dstyle="margin-bottom: 5px;" class="btn btn-danger" onclick="openLogoutModal()">Logout</button>
+            </div>
+
+        </div>
+    </nav>
+
+    <!-- Logout Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to logout?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <a href="/logout" class="btn btn-primary">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Welcome, {{ user.username }}</h3>
+    
+<!-- All Books Modal -->
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Description</th>
+            <th>Section</th>
+            <th>Image</th>
+            <th>Action</th>
+            <th>Price</th>
+            <th>Download</th>
+            <th>Reviews</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for book in books %}
+            <tr>
+                <td>{{ book.title }}</td>
+                <td>{{ book.author }}</td>
+                <td>{{ book.description }}</td>
+                <td>{{ book.section.title }}</td>
+                <td><img src="{{ url_for('static', filename='images/' + book.image) }}" alt="{{ book.title }}" style="max-width: 100px;"></td>
+                <td>
+                    <form action="/request_book" method="post">
+                        <input type="hidden" name="book_id" value="{{ book.id }}">
+                        <button type="submit" class="btn btn-primary">Request</button>
+                    </form>
+                </td>
+                <td>{{ book.price }}</td>
+                <td>
+                    <button type="button" class="btn btn-primary" onclick="showDownloadModal('{{ book.title }}', '{{ book.price }}')">Download</button>
+                </td>
+                <td>
+                    <a href="{{ url_for('show_reviews', book_id=book.id) }}"><button type="button" class="btn btn-info">Reviews</button></a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- My Books Modal -->
+<div class="modal fade" id="myBooksModal" tabindex="-1" role="dialog" aria-labelledby="myBooksModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myBooksModalLabel">My Approved Books</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Issued Date</th>
+                            <th>Return Date</th>
+                            <th>View</th>
+                            <th>Price</th>
+                            <th>Delete</th>
+                            <th>Feedback</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Your books will be inserted here -->
+                        {% for book, issued_date, return_date in my_books %}
+                        <tr>
+                            <td>{{ book.title }}</td>
+                            <td>{{ issued_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ return_date.strftime('%Y-%m-%d') }}</td>
+                            <td><a href="{{ url_for('serve_book', book_id=book.id) }}" target="_blank">Read</a>
+                            </td>
+                            <td>{{ book.price }}</td>
+                            <td>
+                                <a href="/return_book/{{book.id}}"><button type="submit" class="btn btn-danger">Return</button></a> 
+                            </td>
+                            <td>
+                                <a href="{{ url_for('show_feedback_form', book_id=book.id) }}"><button class="btn btn-warning">Feedback</button></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Download Modal -->
+<div class="modal fade" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="downloadModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="downloadModalLabel">Download Book</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Title: <span id="bookTitle"></span></p>
+                <p>Price: <span id="bookPrice"></span></p>
+                <button type="button" class="btn btn-primary" onclick="downloadBook()">Buy</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+    <script>
+    // Function to show download modal with book details
+    function showDownloadModal(title, price) {
+        $('#bookTitle').text(title);
+        $('#bookPrice').text(price);
+        $('#downloadModal').modal('show');
+    }
+
+    // Function to simulate book download
+    function downloadBook() {
+        // Replace this with your actual download logic
+        alert('Downloading book...');
+    }
+
+        // Function to handle Logout button click
+        $('#logoutButton').click(function() {
+            $('#logoutModal').modal('show'); // Show Logout modal
+        });
+    </script>
+   
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+<form action="/edit_book/{{ book.id }}" method="post">
+    <div class="form-group">
+        <label for="title">Title</label>
+        <input type="text" class="form-control" id="title" name="title" value="{{ book.title }}">
+    </div>
+    <div class="form-group">
+        <label for="author">Author</label>
+        <input type="text" class="form-control" id="author" name="author" value="{{ book.author }}">
+    </div>
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3">{{ book.description }}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="section">Section</label>
+        <select class="form-control" id="section" name="section">
+            {% for section in sections %}
+                <option value="{{ section.id }}" {% if book.section_id == section.id %} selected {% endif %}>{{ section.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Sam Library</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <link rel="icon" href="{{ url_for('static', filename='favicon.jpeg') }}" type="image/x-icon">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand">Sam Library</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about">About</a>
+                </li>
+            </ul>
+
+            <!-- Inside the navbar -->
+            <form class="form-inline my-2 my-lg-0" action="{{ url_for('search_books') }}" method="GET">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search by title, author, or section" aria-label="Search" name="query">
+                <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Search</button>
+            </form>
+
+            <div class="mx-2">
+                <a href="/stats_admin" id="statsLink" style="margin-bottom: 5px;" class="btn btn-primary">Stats</a>
+            </div>
+            <div class="mx-2">
+                <button style="margin-bottom: 5px;" class="btn btn-success" data-toggle="modal"
+                    data-target="#addSectionModal">Add Section</button>
+            </div>
+            <div class="mx-2">
+                <button style="margin-bottom: 5px;" class="btn btn-danger" data-toggle="modal"
+                    data-target="#logoutModal">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <h3>Admin Dashboard</h3>
+
+    <!-- Logout Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to logout?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <a href="/logout" class="btn btn-primary">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Container for sections -->
+<h4>Sections</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Date Created</th>
+            <th>Image</th>
+            <th>Action</th>
+            <th>Edit  </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for section in sections %}
+            <tr>
+                <td><a href="/librarian_dashboard/{{ section.id }}">{{ section.title }}</a></td>
+                <td>{{ section.description }}</td>
+                <td>{{ section.date_created.strftime("%Y-%m-%d") }}</td> <!-- Display date created -->
+                <td><a href="/librarian_dashboard/{{ section.id }}"><img src="{{ url_for('static', filename='images/' + section.image) }}" alt="{{ section.title }}" style="max-width: 100px;"></a></td>
+                <td>
+                    <form action="/delete_section/{{ section.id }}" method="post">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+                <td>
+                    <a href="/edit_section/{{ section.id }}" class="btn btn-primary">Edit</a>
+                </td>               
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
+
+  
+  <!-- Add Section Modal -->
+  <div class="modal fade" id="addSectionModal" tabindex="-1" role="dialog" aria-labelledby="addSectionModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addSectionModalLabel">Add Section</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/add_section" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter title">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="image">Upload Image</label>
+                        <input type="file" class="form-control-file" id="image" name="image">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary btn-save-changes">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Display Pending Requests -->
+<h4>Pending Requests</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Requested Book</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for request,book,user_id in books_requested %}
+            <tr>
+                <td>{{ request.user.username }}</td>
+                <td>{{ request.book.title }}</td>
+                <td>
+                    <form action="{{ url_for('approve_request', request_id=request.id) }}" method="post">
+                        <button type="submit" class="btn btn-success">Grant Permission</button>
+                    </form>
+                    <form action="{{ url_for('reject_request', request_id=request.id) }}" method="post">
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+    
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function(){
+        // Function to handle form submission
+        function submitForm(formData) {
+            $.ajax({
+                url: '/add_section',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(data) {
+                    alert('Data uploaded successfully');
+                    $('#addSectionModal').modal('hide');  // Close the modal after successful submission
+                    // Reload the page to display the newly added section
+                    location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+    
+        // Event listener for the "Save Changes" button
+        $(".btn-save-changes").click(function(){
+            var formData = new FormData($('#addSectionModal form')[0]);
+            submitForm(formData);
+        });
+    
+       // Event listener for form submission on pressing Enter key
+        $('#addSectionModal form').on('submit', function(e) {
+            e.preventDefault(); // Prevent the default form submission behavior
+            var formData = new FormData(this);
+            submitForm(formData);
+        });
+
+    });
+</script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+</body>
+
+</html>
